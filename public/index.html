@@ -1,0 +1,706 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="TikTok & YouTube News Auto Uploader - Tự động tạo và upload video tin tức lên TikTok và YouTube"
+    />
+    <title>News Auto Uploader – TikTok &amp; YouTube</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <div class="app-layout">
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+          <div class="logo">TN</div>
+          <div>
+            <h1>TikTok News</h1>
+            <span>Auto Uploader v1.0</span>
+          </div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <div class="nav-section">
+            <div class="nav-section-title">Tổng quan</div>
+            <div
+              class="nav-item active"
+              data-page="dashboard"
+              onclick="navigateTo('dashboard')"
+            >
+              <span class="icon">📊</span> Dashboard
+            </div>
+          </div>
+
+          <div class="nav-section">
+            <div class="nav-section-title">Nội dung</div>
+            <div class="nav-item" data-page="news" onclick="navigateTo('news')">
+              <span class="icon">📰</span> Tin tức
+              <span class="nav-badge" id="nav-news-count">0</span>
+            </div>
+            <div
+              class="nav-item"
+              data-page="videos"
+              onclick="navigateTo('videos')"
+            >
+              <span class="icon">🎬</span> Videos
+            </div>
+            <div
+              class="nav-item"
+              data-page="slidesets"
+              onclick="navigateTo('slidesets')"
+            >
+              <span class="icon">🖼️</span> Slides Ảnh
+            </div>
+          </div>
+
+          <div class="nav-section">
+            <div class="nav-section-title">TikTok</div>
+            <div
+              class="nav-item"
+              data-page="upload"
+              onclick="navigateTo('upload')"
+            >
+              <span class="icon">⬆️</span> Upload
+            </div>
+            <div
+              class="nav-item"
+              data-page="stats"
+              onclick="navigateTo('stats')"
+            >
+              <span class="icon">📈</span> Thống kê
+            </div>
+          </div>
+
+          <div class="nav-section">
+            <div class="nav-section-title">YouTube & Drive</div>
+            <div
+              class="nav-item"
+              data-page="youtube"
+              onclick="navigateTo('youtube')"
+            >
+              <span class="icon">📺</span> YouTube
+              <span class="nav-badge yt-badge" id="nav-yt-badge" style="display:none;background:#ff0000">LIVE</span>
+            </div>
+            <div
+              class="nav-item"
+              data-page="drive"
+              onclick="navigateTo('drive')"
+            >
+              <span class="icon">☁️</span> Google Drive
+            </div>
+          </div>
+
+          <div class="nav-section">
+            <div class="nav-section-title">Hệ thống</div>
+            <div
+              class="nav-item"
+              data-page="settings"
+              onclick="navigateTo('settings')"
+            >
+              <span class="icon">⚙️</span> Cài đặt
+            </div>
+          </div>
+        </nav>
+
+        <div class="sidebar-account">
+          <div
+            class="account-card"
+            id="account-card"
+            onclick="handleAccountClick()"
+          >
+            <div class="account-avatar" id="account-avatar">👤</div>
+            <div class="account-info">
+              <div class="account-name" id="account-name">Chưa đăng nhập</div>
+              <div class="account-status offline" id="account-status">
+                Offline
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- ============ DASHBOARD ============ -->
+        <div class="page-section active" id="page-dashboard">
+          <div class="main-header">
+            <h2>📊 Dashboard</h2>
+            <div class="header-actions">
+              <button
+                class="btn btn-secondary btn-sm"
+                onclick="loadDashboard()"
+              >
+                🔄 Refresh
+              </button>
+            </div>
+          </div>
+          <div class="main-body">
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-icon">📰</div>
+                <div class="stat-value" id="stat-news">0</div>
+                <div class="stat-label">Tin tức</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon">🎬</div>
+                <div class="stat-value" id="stat-videos">0</div>
+                <div class="stat-label">Videos</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon">👁️</div>
+                <div class="stat-value" id="stat-views">0</div>
+                <div class="stat-label">Lượt xem</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon">❤️</div>
+                <div class="stat-value" id="stat-likes">0</div>
+                <div class="stat-label">Lượt thích</div>
+              </div>
+            </div>
+
+            <div
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px"
+            >
+              <div class="card">
+                <div class="card-header">
+                  <h3>📰 Tin mới nhất</h3>
+                  <button class="btn btn-sm btn-primary" onclick="scrapeNews()">
+                    🔍 Lấy tin mới
+                  </button>
+                </div>
+                <div class="card-body" id="recent-news">
+                  <div class="empty-state">
+                    <div class="icon">📰</div>
+                    <h4>Chưa có tin tức</h4>
+                    <p>Nhấn "Lấy tin mới" để bắt đầu</p>
+                  </div>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-header">
+                  <h3>🎬 Video gần đây</h3>
+                  <button
+                    class="btn btn-sm btn-secondary"
+                    onclick="navigateTo('videos')"
+                  >
+                    Xem tất cả
+                  </button>
+                </div>
+                <div class="card-body" id="recent-videos">
+                  <div class="empty-state">
+                    <div class="icon">🎬</div>
+                    <h4>Chưa có video</h4>
+                    <p>Tạo video từ tin tức</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ NEWS ============ -->
+        <div class="page-section" id="page-news">
+          <div class="main-header">
+            <h2>📰 Quản lý Tin tức</h2>
+            <div class="header-actions">
+              <div class="search-bar">
+                <span class="icon">🔍</span>
+                <input
+                  type="text"
+                  id="news-search"
+                  placeholder="Tìm kiếm tin tức..."
+                  oninput="searchNews()"
+                />
+              </div>
+              <button class="btn btn-primary" onclick="scrapeNews()">
+                🔍 Lấy tin mới
+              </button>
+              <button class="btn btn-secondary" onclick="checkUrlModal()">
+                🔗 Kiểm tra URL
+              </button>
+            </div>
+          </div>
+          <div class="main-body">
+            <div class="tabs">
+              <div class="tab active" onclick="filterNews('all', this)">
+                Tất cả
+              </div>
+              <div class="tab" onclick="filterNews('new', this)">Mới</div>
+              <div class="tab" onclick="filterNews('processing', this)">
+                Đang xử lý
+              </div>
+              <div class="tab" onclick="filterNews('uploaded', this)">
+                Đã upload
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-body" id="news-list" style="padding: 0">
+                <div class="empty-state">
+                  <div class="icon">📰</div>
+                  <h4>Chưa có tin tức</h4>
+                </div>
+              </div>
+            </div>
+            <div
+              id="news-pagination"
+              style="
+                margin-top: 16px;
+                display: flex;
+                justify-content: center;
+                gap: 8px;
+              "
+            ></div>
+          </div>
+        </div>
+
+        <!-- ============ VIDEOS ============ -->
+        <div class="page-section" id="page-videos">
+          <div class="main-header">
+            <h2>🎬 Quản lý Videos</h2>
+            <div class="header-actions">
+              <button class="btn btn-secondary" onclick="loadVideos()">
+                🔄 Refresh
+              </button>
+            </div>
+          </div>
+          <div class="main-body">
+            <div class="tabs">
+              <div class="tab active" onclick="filterVideos('all', this)">
+                Tất cả
+              </div>
+              <div class="tab" onclick="filterVideos('created', this)">
+                Đã tạo
+              </div>
+              <div class="tab" onclick="filterVideos('ready', this)">
+                Sẵn sàng
+              </div>
+              <div class="tab" onclick="filterVideos('uploaded', this)">
+                Đã upload
+              </div>
+            </div>
+            <div class="video-grid" id="video-list">
+              <div class="empty-state" style="grid-column: 1/-1">
+                <div class="icon">🎬</div>
+                <h4>Chưa có video</h4>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ SLIDESETS ============ -->
+        <div class="page-section" id="page-slidesets">
+          <div class="main-header">
+            <h2>🖼️ Slides Ảnh TikTok</h2>
+            <div class="header-actions">
+              <button class="btn btn-primary" onclick="openCreateSlideset()">
+                ➕ Tạo bộ slides mới
+              </button>
+              <button class="btn btn-secondary" onclick="loadSlidesets()">
+                🔄 Refresh
+              </button>
+            </div>
+          </div>
+          <div class="main-body">
+            <div class="tabs">
+              <div class="tab active" onclick="filterSlidesets('all', this)">Tất cả</div>
+              <div class="tab" onclick="filterSlidesets('ready', this)">Slides sẵn sàng</div>
+              <div class="tab" onclick="filterSlidesets('video_ready', this)">Video sẵn sàng</div>
+              <div class="tab" onclick="filterSlidesets('uploaded', this)">Đã upload</div>
+              <div class="tab" onclick="filterSlidesets('error', this)">Lỗi</div>
+            </div>
+            <div id="slidesets-list">
+              <div class="empty-state">
+                <div class="icon">🖼️</div>
+                <h4>Chưa có bộ slides nào</h4>
+                <p>Tạo bộ slides mới từ các tin tức</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ UPLOAD ============ -->
+        <div class="page-section" id="page-upload">
+          <div class="main-header">
+            <h2>⬆️ Upload lên TikTok</h2>
+          </div>
+          <div class="main-body">
+            <div class="card">
+              <div class="card-header"><h3>Videos sẵn sàng upload</h3></div>
+              <div class="card-body" id="upload-list">
+                <div class="empty-state">
+                  <div class="icon">⬆️</div>
+                  <h4>Không có video sẵn sàng</h4>
+                  <p>Tạo video từ tin tức trước</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ STATS ============ -->
+        <div class="page-section" id="page-stats">
+          <div class="main-header">
+            <h2>📈 Thống kê TikTok</h2>
+            <div class="header-actions">
+              <button class="btn btn-primary" id="btn-sync-stats" onclick="syncTikTokStats()">
+                🔄 Sync từ TikTok
+              </button>
+              <button class="btn btn-secondary" onclick="loadTikTokStats()">
+                🔃 Cập nhật
+              </button>
+            </div>
+          </div>
+          <div class="main-body">
+            <div class="stats-grid" id="tiktok-stats-grid">
+              <div class="stat-card">
+                <div class="stat-icon">🎬</div>
+                <div class="stat-value" id="tt-total-videos">0</div>
+                <div class="stat-label">Tổng video</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon">👁️</div>
+                <div class="stat-value" id="tt-total-views">0</div>
+                <div class="stat-label">Tổng lượt xem</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon">❤️</div>
+                <div class="stat-value" id="tt-total-likes">0</div>
+                <div class="stat-label">Tổng lượt thích</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon">💬</div>
+                <div class="stat-value" id="tt-total-comments">0</div>
+                <div class="stat-label">Tổng bình luận</div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><h3>Video đã upload</h3></div>
+              <div class="card-body">
+                <div id="stats-sync-hint" style="display:none;margin-bottom:12px;padding:10px 14px;background:rgba(0,242,234,0.08);border:1px solid rgba(0,242,234,0.2);border-radius:8px;font-size:13px;color:var(--secondary);"></div>
+                <table class="data-table" id="stats-table">
+                  <thead>
+                    <tr>
+                      <th>Video / Bộ Slides</th>
+                      <th>Views</th>
+                      <th>Likes</th>
+                      <th>Comments</th>
+                      <th>Shares</th>
+                      <th>Ngày upload</th>
+                    </tr>
+                  </thead>
+                  <tbody id="stats-table-body">
+                    <tr>
+                      <td
+                        colspan="6"
+                        style="
+                          text-align: center;
+                          color: var(--text-muted);
+                          padding: 40px;
+                        "
+                      >
+                        Chưa có dữ liệu
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ YOUTUBE ============ -->
+        <div class="page-section" id="page-youtube">
+          <div class="main-header">
+            <h2>📺 YouTube Manager</h2>
+            <div class="header-actions">
+              <button class="btn btn-secondary btn-sm" onclick="loadYouTubePage()">🔄 Refresh</button>
+            </div>
+          </div>
+          <div class="main-body">
+
+            <!-- YT Account Card -->
+            <div class="card" style="margin-bottom:16px">
+              <div class="card-header">
+                <h3>🔑 Tài khoản Google / YouTube</h3>
+                <div style="display:flex;gap:8px">
+                  <button class="btn btn-sm" id="btn-yt-login" style="background:linear-gradient(135deg,#ff0000,#cc0000);color:#fff" onclick="loginYouTube()">
+                    📺 Đăng nhập Google
+                  </button>
+                  <button class="btn btn-sm btn-ghost" id="btn-yt-logout" style="display:none" onclick="logoutYouTube()">
+                    🚪 Đăng xuất
+                  </button>
+                </div>
+              </div>
+              <div class="card-body">
+                <div id="yt-account-info">
+                  <div class="empty-state" style="padding:20px">
+                    <div class="icon">📺</div>
+                    <h4>Chưa kết nối YouTube</h4>
+                    <p>Nhấn "Đăng nhập Google" để kết nối kênh YouTube của bạn</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- YT Channel Stats -->
+            <div id="yt-channel-stats" style="display:none;margin-bottom:16px">
+              <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
+                <div class="stat-card" style="border-top:3px solid #ff0000">
+                  <div class="stat-icon">📹</div>
+                  <div class="stat-value" id="yt-stat-videos">0</div>
+                  <div class="stat-label">Video trên kênh</div>
+                </div>
+                <div class="stat-card" style="border-top:3px solid #ff0000">
+                  <div class="stat-icon">👁️</div>
+                  <div class="stat-value" id="yt-stat-views">0</div>
+                  <div class="stat-label">Lượt xem</div>
+                </div>
+                <div class="stat-card" style="border-top:3px solid #ff0000">
+                  <div class="stat-icon">👥</div>
+                  <div class="stat-value" id="yt-stat-subs">0</div>
+                  <div class="stat-label">Subscribers</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Upload Options -->
+            <div class="card" style="margin-bottom:16px">
+              <div class="card-header">
+                <h3>⬆️ Upload lên YouTube</h3>
+                <div style="display:flex;gap:8px;align-items:center">
+                  <label class="form-label" style="margin:0;white-space:nowrap">Chế độ:</label>
+                  <select id="yt-privacy" class="form-input" style="width:140px;padding:6px 10px">
+                    <option value="private">🔒 Private</option>
+                    <option value="unlisted">🔗 Unlisted</option>
+                    <option value="public">🌍 Public</option>
+                  </select>
+                </div>
+              </div>
+              <div class="card-body" style="padding:0">
+                <div class="tabs" style="border-bottom:1px solid var(--border)">
+                  <div class="tab active" onclick="switchYTTab('videos', this)">🎬 Videos</div>
+                  <div class="tab" onclick="switchYTTab('slidesets', this)">🖼️ Slidesets</div>
+                  <div class="tab" onclick="switchYTTab('uploaded', this)">✅ Đã upload</div>
+                </div>
+
+                <!-- Videos tab -->
+                <div id="yt-tab-videos" class="yt-tab-panel">
+                  <div id="yt-videos-list" style="padding:8px 0">
+                    <div class="empty-state"><div class="icon">🎬</div><h4>Chưa có video</h4></div>
+                  </div>
+                </div>
+
+                <!-- Slidesets tab -->
+                <div id="yt-tab-slidesets" class="yt-tab-panel" style="display:none">
+                  <div id="yt-slidesets-list" style="padding:8px 0">
+                    <div class="empty-state"><div class="icon">🖼️</div><h4>Chưa có slideset</h4></div>
+                  </div>
+                </div>
+
+                <!-- Uploaded tab -->
+                <div id="yt-tab-uploaded" class="yt-tab-panel" style="display:none">
+                  <div id="yt-uploaded-list" style="padding:8px 0">
+                    <div class="empty-state"><div class="icon">✅</div><h4>Chưa có video nào được upload</h4></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- YouTube Settings -->
+            <div class="card">
+              <div class="card-header"><h3>⚙️ Cài đặt YouTube</h3></div>
+              <div class="card-body">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                  <div class="form-group">
+                    <label class="form-label">🔑 Google Client ID</label>
+                    <input type="text" class="form-input" id="yt-set-client-id" placeholder="xxx.apps.googleusercontent.com" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">🔐 Google Client Secret</label>
+                    <input type="password" class="form-input" id="yt-set-client-secret" placeholder="GOCSPX-..." />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">🔗 Redirect URI</label>
+                    <input type="text" class="form-input" id="yt-redirect-uri" readonly />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">🏷️ Tags mặc định</label>
+                    <input type="text" class="form-input" id="yt-set-tags" placeholder="tin tức, vnexpress, ..." />
+                  </div>
+                </div>
+                <div class="form-group" style="margin-top:4px">
+                  <label class="form-label">📝 Hướng dẫn thiết lập</label>
+                  <div style="font-size:13px;color:var(--text-muted);line-height:1.7;padding:10px 14px;background:rgba(255,0,0,0.06);border-radius:8px;border:1px solid rgba(255,0,0,0.15)">
+                    1️⃣ Vào <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color:#ff4444">Google Cloud Console</a> &rarr; APIs &amp; Services &rarr; Credentials<br/>
+                    2️⃣ Tạo <strong>OAuth 2.0 Client ID</strong> (loại: Web application)<br/>
+                    3️⃣ Thêm Redirect URI: <code id="yt-setup-uri" style="background:rgba(255,255,255,0.1);padding:2px 6px;border-radius:4px"></code><br/>
+                    4️⃣ Bật API: <strong>YouTube Data API v3</strong><br/>
+                    5️⃣ Dán Client ID &amp; Secret vào ồ trên rồi lưu, sau đó khởi động lại server
+                  </div>
+                </div>
+                <button class="btn btn-primary" onclick="saveYouTubeSettings()">💾 Lưu cài đặt</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ============ GOOGLE DRIVE ============ -->
+        <div class="page-section" id="page-drive">
+          <div class="main-header">
+            <h2>☁️ Google Drive Sync</h2>
+            <div class="header-actions">
+              <button class="btn btn-secondary btn-sm" onclick="loadDrivePage()">🔄 Refresh</button>
+            </div>
+          </div>
+          <div class="main-body">
+            
+            <!-- Database Sync -->
+            <div class="card" style="margin-bottom:16px">
+              <div class="card-header">
+                <h3>💾 Đồng bộ Dữ liệu (Database)</h3>
+              </div>
+              <div class="card-body">
+                <p style="color:var(--text-muted);font-size:14px;margin-bottom:16px;">
+                  Sử dụng tính năng này để đồng bộ dữ liệu giữa 2 máy (ví dụ: máy nhà và máy công ty).<br>
+                  <strong style="color:var(--warning)">Lưu ý:</strong> Tài khoản Google kết nối là tài khoản bạn đã đăng nhập ở phần YouTube.
+                </p>
+                <div style="display:flex;gap:12px;">
+                  <button class="btn btn-primary" onclick="backupDbToDrive()">
+                    📤 Xuất Data & Upload lên Drive
+                  </button>
+                  <button class="btn btn-secondary" onclick="restoreDbFromDrive()" style="border-color:var(--warning);color:var(--warning)">
+                    📥 Tải Data từ Drive & Áp dụng
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Videos & Slides -->
+            <div class="card">
+              <div class="card-header">
+                <h3>🎬 Quản lý Videos & Slides</h3>
+              </div>
+              <div class="card-body" style="padding:0;">
+                <div id="drive-media-list" style="padding:8px 0;">
+                  <div class="empty-state"><div class="icon">☁️</div><h4>Đang tải dữ liệu...</h4></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ============ SETTINGS ============ -->
+        <div class="page-section" id="page-settings">
+          <div class="main-header">
+            <h2>⚙️ Cài đặt</h2>
+          </div>
+          <div class="main-body">
+            <div
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px"
+            >
+              <div class="card">
+                <div class="card-header"><h3>🔑 TikTok API</h3></div>
+                <div class="card-body">
+                  <div class="form-group">
+                    <label class="form-label">Client Key</label>
+                    <input
+                      type="text"
+                      class="form-input"
+                      id="set-client-key"
+                      placeholder="Nhập TikTok Client Key"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Client Secret</label>
+                    <input
+                      type="password"
+                      class="form-input"
+                      id="set-client-secret"
+                      placeholder="Nhập TikTok Client Secret"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Redirect URI</label>
+                    <input
+                      type="text"
+                      class="form-input"
+                      id="set-redirect-uri"
+                      value="https://localhost:3005/auth/tiktok/callback"
+                      readonly
+                    />
+                  </div>
+                  <button class="btn btn-tiktok" onclick="loginTikTok()">
+                    🔗 Đăng nhập TikTok
+                  </button>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-header"><h3>🎬 Video Settings</h3></div>
+                <div class="card-body">
+                  <div class="form-group">
+                    <label class="form-label">Số slide mỗi video</label>
+                    <input
+                      type="number"
+                      class="form-input"
+                      id="set-slides"
+                      value="5"
+                      min="3"
+                      max="10"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Thời gian mỗi slide (giây)</label>
+                    <input
+                      type="number"
+                      class="form-input"
+                      id="set-duration"
+                      value="4"
+                      min="2"
+                      max="10"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Watermark</label>
+                    <input
+                      type="text"
+                      class="form-input"
+                      id="set-watermark"
+                      value="Nguồn: VnExpress.net"
+                    />
+                  </div>
+                  <button class="btn btn-primary" onclick="saveSettings()">
+                    💾 Lưu cài đặt
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Modal Overlay -->
+    <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+      <div class="modal" id="modal">
+        <div class="modal-header">
+          <h3 id="modal-title">Modal</h3>
+          <button class="btn btn-ghost btn-icon" onclick="closeModal()">
+            ✕
+          </button>
+        </div>
+        <div class="modal-body" id="modal-body"></div>
+        <div class="modal-footer" id="modal-footer"></div>
+      </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="/js/app.js"></script>
+  </body>
+</html>
