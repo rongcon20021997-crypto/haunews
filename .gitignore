@@ -1,6 +1,8 @@
 node_modules/
-data/
-temp/
-ssl/
+temp/*
+!temp/.gitkeep
+!temp/*/
+temp/*/*
+!temp/*/.gitkeep
 .env
 *.log
